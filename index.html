@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>A</title>
+    <style>
+            div.tooltip {	
+                position: absolute;			
+                text-align: center;			
+                width: 60px;					
+                height: 28px;					
+                padding: 2px;				
+                font: 12px sans-serif;		
+                background: lightsteelblue;	
+                border: 0px;		
+                border-radius: 8px;			
+                pointer-events: none;			
+            }
+
+    p {
+        font-size: 14px;
+        color:#fff;
+        
+    }        
+
+    body{
+        position: relative;
+        background-color: black;
+        
+    }        
+
+    #chart{
+        overflow:visible;
+    }
+
+    .center {
+        position: absolute;
+        top:50px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .svg {
+        position: absolute;
+        top:50%;
+        left:50%;
+    }        
+
+
+     .buttonGroup {
+        display: flex;
+        justify-content: center;
+        
+
+     }  
+
+     .buttonGroup button{
+        width:120px;
+        height:30px;
+        border-radius: 5px;
+        border: none;
+        color: #fff;
+        font-size: 16px;
+        cursor: pointer;   
+        outline: none;     
+        transition: transform .5s;
+     }   
+
+     .buttonGroup button:active{
+         transform: scale(1.2);
+     }  
+
+     .unselected {
+        background-color: rgb(77, 60, 224);
+
+     }
+
+     .selected{
+        background-color: rgb(12, 189, 50);
+     }
+
+     .buttonGroup button:nth-child(2){
+         margin:0 10px;
+     }
+     .buttonGroup button:nth-child(3){
+        margin-right:10px;
+     }
+
+     .tooltip {
+         display: flex;
+         justify-content: center;
+         align-items: center;
+         background-color: black;
+         color: #fff;
+         min-width: 120px;
+       
+     }
+    </style>    
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+</head>
+<body>
+
+    <div class="buttonGroup">
+        <p>Tree Structure</p>
+    </div>
+    <div id="chart">
+    </div>
+    
+    <script 
+        type="text/javascript" 
+        src="./treedata.json">
+    </script> 
+    <script>
+                
+        (function (global, factory) {
+            typeof exports === 'object' && typeof module !== 'undefined' ? factory(require('d3-selection'), require('d3-transition')) :
+            typeof define === 'function' && define.amd ? define(['d3-selection', 'd3-transition'], factory) :
+            (factory(global.d3,global.d3));
+        }(this, (function (d3Selection,d3Transition) { 'use strict';
+
+        function attrsFunction(selection$$1, map) {
+        return selection$$1.each(function() {
+            var x = map.apply(this, arguments), s = d3Selection.select(this);
+            for (var name in x) s.attr(name, x[name]);
+        });
+        }
+
+        function attrsObject(selection$$1, map) {
+        for (var name in map) selection$$1.attr(name, map[name]);
+        return selection$$1;
+        }
+
+        var selection_attrs = function(map) {
+        return (typeof map === "function" ? attrsFunction : attrsObject)(this, map);
+        };
+
+        function stylesFunction(selection$$1, map, priority) {
+        return selection$$1.each(function() {
+            var x = map.apply(this, arguments), s = d3Selection.select(this);
+            for (var name in x) s.style(name, x[name], priority);
+        });
+        }
+
+        function stylesObject(selection$$1, map, priority) {
+        for (var name in map) selection$$1.style(name, map[name], priority);
+        return selection$$1;
+        }
+
+        var selection_styles = function(map, priority) {
+        return (typeof map === "function" ? stylesFunction : stylesObject)(this, map, priority == null ? "" : priority);
+        };
+
+        function propertiesFunction(selection$$1, map) {
+        return selection$$1.each(function() {
+            var x = map.apply(this, arguments), s = d3Selection.select(this);
+            for (var name in x) s.property(name, x[name]);
+        });
+        }
+
+        function propertiesObject(selection$$1, map) {
+        for (var name in map) selection$$1.property(name, map[name]);
+        return selection$$1;
+        }
+
+        var selection_properties = function(map) {
+        return (typeof map === "function" ? propertiesFunction : propertiesObject)(this, map);
+        };
+
+        function attrsFunction$1(transition$$1, map) {
+        return transition$$1.each(function() {
+            var x = map.apply(this, arguments), t = d3Selection.select(this).transition(transition$$1);
+            for (var name in x) t.attr(name, x[name]);
+        });
+        }
+
+        function attrsObject$1(transition$$1, map) {
+        for (var name in map) transition$$1.attr(name, map[name]);
+        return transition$$1;
+        }
+
+        var transition_attrs = function(map) {
+        return (typeof map === "function" ? attrsFunction$1 : attrsObject$1)(this, map);
+        };
+
+        function stylesFunction$1(transition$$1, map, priority) {
+        return transition$$1.each(function() {
+            var x = map.apply(this, arguments), t = d3Selection.select(this).transition(transition$$1);
+            for (var name in x) t.style(name, x[name], priority);
+        });
+        }
+
+        function stylesObject$1(transition$$1, map, priority) {
+        for (var name in map) transition$$1.style(name, map[name], priority);
+        return transition$$1;
+        }
+
+        var transition_styles = function(map, priority) {
+        return (typeof map === "function" ? stylesFunction$1 : stylesObject$1)(this, map, priority == null ? "" : priority);
+        };
+
+        d3Selection.selection.prototype.attrs = selection_attrs;
+        d3Selection.selection.prototype.styles = selection_styles;
+        d3Selection.selection.prototype.properties = selection_properties;
+        d3Transition.transition.prototype.attrs = transition_attrs;
+        d3Transition.transition.prototype.styles = transition_styles;
+
+        })));
+    </script>
+    <script>      
+        fetch('./treedata.json')
+        .then(function(resp){
+            return resp.json();
+        })
+        .then(function(data){
+            console.log("Test")
+        parentFunction(data);
+        });
+
+        function parentFunction(jsondata){
+
+
+        console.log("the data is")
+        console.log(jsondata)
+
+
+        let mouseX = 0;
+        //these global variables I should later get via closure
+        let buttonTracker = [];
+        let rootNode = d3.hierarchy(jsondata, d=>d.children);
+        var pathLinks = rootNode.links(); 
+        var updatePathLinks;
+
+        var circleLinks = rootNode.descendants();
+        var updateCircleLinks;
+
+        var textLinks = rootNode.descendants();
+        var updateTextLinks;
+
+
+        let dim = {
+            'width': window.screen.width, 
+            'height':window.screen.height * 7   , 
+            'margin':50    
+        };
+
+        let svg = d3.select('#chart').append('svg')
+            .style('background', 'black')   
+            .attrs(dim);
+
+
+        document.querySelector("#chart").classList.add("center");
+
+        //let rootNode = d3.hierarchy(data);
+
+
+
+
+        let g = svg.append('g')
+                    .attr('transform', 'translate(140,50)');
+
+            let layout = d3.tree().size([dim.height-50, dim.width-320]);
+
+            layout(rootNode);
+            console.log(rootNode.links());
+            console.log("----------------------");
+            console.log(rootNode.descendants());
+            //console.log(rootNode.descendants());
+        //first lets create a path 
+        let lines = g.selectAll('path');  
+
+
+
+        function update(data){
+
+        let group =  g.selectAll('path')
+            .data(data, (d,i) => d.target.data.name)
+            .join(
+            function(enter){
+                return enter.append('path')
+                            .attrs({
+                                'd': d3.linkHorizontal()
+                                .x(d => mouseX)
+                                .y(d => d.x),
+                            'fill':'none',
+                            'stroke':'white'
+                            })
+            },
+            function(update){
+                return update;
+            },
+            function(exit){
+        
+
+
+                return exit.call(path => path.transition().duration(300).remove()
+                                                        .attr('d', d3.linkHorizontal()
+                                                                    .x(d => mouseX)
+                                                                    .y(d =>d.x)));
+            }
+
+
+        )
+        .call(path => path.transition().duration(1000).attr('d', d3.linkHorizontal()
+                .x(d => d.y)
+                .y(d => d.x))
+                .attr("id", function(d,i){return "path"+i}));
+
+
+        }
+        update(pathLinks); //rootNode.links()
+
+
+
+        function updateCircles(data){
+            g.selectAll('circle')
+            .data(data, (d) => d.data.name)
+            .join(
+                function(enter){
+                    return enter.append('circle')
+                                .attrs({
+                                    'cx':(d)=> mouseX,
+                                    'cy':(d) => d.x,
+                                    'r':12,
+                                    'fill':(d) => {
+                                        if(d.children == undefined){
+                                            return 'red'
+                                        }
+                                        return 'green'
+                                    },
+                                    'id': (d,i) =>d.data.name,
+                                    'class':'sel'                           
+                                })
+                },
+                function(update){
+                    return update;
+                },
+                function(exit){
+
+                    return exit.call(path => path.transition().duration(300).remove()
+                    .attrs({
+                        'cx':(d) =>mouseX,
+                        'r':(d) => 0
+                    }));
+
+                }
+
+
+            )
+            .call(circle => circle.transition().duration(1000).attr('cx', (d)=>d.y))
+
+            .on('mouseover', function(d){
+
+            d3.select(this)
+                .attrs({                
+                    'fill':'orange',
+
+                })
+                .transition().duration(100).attr('r', 16);
+            })
+            .on('mouseout', function(d){
+            d3.select(this)
+                .attr('fill', (d)=>{
+                        if(d.children ==undefined){
+                            return 'red'
+                        }
+                        return 'green'
+                })
+                .transition().duration(100).attr('r', 12)
+
+            })
+            .on('click', async function(d){
+
+                let buttonId = d3.select(this)["_groups"][0][0]["attributes"].id.value;
+                mouseX = d3.select(this)["_groups"][0][0]["attributes"].cx.value;
+                //check to see if button already exists aka has been clicked
+                //if it does, we need to send that data to update function
+                //and remove that object
+
+                let checkButtonExists = buttonTracker.filter(button => button.buttonId == buttonId);
+        
+                if(checkButtonExists[0]!=undefined){
+                        //also remove this item from button tracker
+                    buttonTracker = buttonTracker.filter(button => button.buttonId != buttonId);
+                    
+                    //handle path update
+                    pathLinks = checkButtonExists[0].buttonPathData.concat(pathLinks);
+                                    
+                    update(pathLinks);
+
+
+                        //handle  circle update
+                    circleLinks = checkButtonExists[0].buttonCircleData.concat(circleLinks);
+                        updateCircles(circleLinks);
+
+                        //handle text update
+
+                        textLinks =checkButtonExists[0].buttonTextData.concat(textLinks);
+                        updateText(textLinks);
+
+                        return;
+
+                }
+
+                var valueArray = await processedlinks(d.links());   
+
+                updatePathLinks = pathLinks.filter(function(item){        
+                        return !valueArray.includes(item.target.data.name);                                       
+                });
+
+                //now run the filter to get unfiltered items
+                var clickedPathData = pathLinks.filter(function(item){
+                    return valueArray.includes(item.target.data.name);
+                    });
+
+
+                updateCircleLinks = circleLinks.filter(function(item){
+                            return !valueArray.includes(item.data.name);
+                });
+
+                var clickedCircleData = circleLinks.filter(function(item){
+                            return valueArray.includes(item.data.name);
+                });
+                
+                
+                updateTextLinks = textLinks.filter(function(item){
+                            return !valueArray.includes(item.data.name);
+                });
+
+                var clickedTextData = textLinks.filter(function(item){
+                            return valueArray.includes(item.data.name);
+                });
+
+                //now we push the circleData to an array
+                buttonTracker.push({
+                    buttonId:buttonId,
+                    buttonPathData: clickedPathData,
+                    buttonCircleData:clickedCircleData,
+                    buttonTextData:clickedTextData
+                })
+
+                
+                update(updatePathLinks);
+                updateCircles(updateCircleLinks);
+                updateText(updateTextLinks);
+                async function processedlinks(dlinks) {
+                var valueArray = [];
+            
+                    return new Promise((resolve, reject)=>{
+                            dlinks.forEach(async(element) =>{
+                                valueArray.push(element.target.data.name); 
+                            });
+                            resolve(valueArray);      
+                    });
+                }
+
+                pathLinks = updatePathLinks;
+                circleLinks = updateCircleLinks;
+                textLinks = updateTextLinks;
+
+            });
+
+
+        }
+
+        updateCircles(rootNode.descendants());
+        
+
+        function updateText(data){
+
+            g.selectAll('text')
+            .data(data, (d) =>d.data.name)
+            .join(
+                function(enter){
+                    return enter.append('text')
+                                .attrs({
+                                    'x': (d) =>mouseX,
+                                    'y':(d) => d.x,
+                                    'font-size':0
+                                })
+                                .text((d) => d.data.name);
+                },
+                function(update){
+                    return update;
+                },
+                function(exit){
+                        return exit.call(text => text.transition().duration(300).remove().attrs({
+                            'x':(d) => mouseX,
+                            'font-size':0 
+                        }));   
+                }
+
+            )
+            .call(text => text.transition().duration(1000).attrs({
+                'x':(d) =>d.y+20,
+                'font-size':15,
+                'fill':'yellow',
+                }));
+        }
+
+        updateText(textLinks);
+
+        }
+    </script>
+</body>
+</html>
